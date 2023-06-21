@@ -1,9 +1,11 @@
-
+import Navbar from '@/components/Navbar/Navbar';
 
 export default function Home() {
   return (
-   <main>
-    <h1>Turing Technologies Frontend Test</h1>
-   </main>
-  )
+    <>
+      <Navbar />
+
+      <h1>Turing Technologies Frontend Test</h1>
+    </>
+  );
 }
