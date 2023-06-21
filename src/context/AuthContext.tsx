@@ -2,7 +2,7 @@ import DefaultSpinner from '@/components/DefaultSpinner/DefaultSpinner';
 import { User } from '@/types';
 import { baseURL } from '@/utils/api';
 import { authorizationHeader } from '@/utils/helpers';
-import axios from 'axios';
+import axios, { isAxiosError } from 'axios';
 import { useRouter } from 'next/router';
 import { type } from 'os';
 import {
@@ -57,21 +57,56 @@ function AuthContextProvider({ children }: PropsWithChildren) {
     localStorage.removeItem('refresh_token');
   };
 
+  const refreshAccessToken = async () => {
+    const res = await axios({
+      method: 'post',
+      url: `${baseURL}/auth/refresh-token`,
+      headers: authorizationHeader(),
+    });
+
+    const { access_token, user } = res.data;
+
+    localStorage.setItem('access_token', access_token);
+    setUser(user);
+  };
+
+  // get user data on first render
+  // and refresh token if expired on load
   useEffect(() => {
     if (accessToken && refreshToken) {
       axios({
         method: 'get',
         url: `${baseURL}/me`,
         headers: authorizationHeader(),
-      }).then(res => {
-        setUser(res.data);
-        setLoading(false);
-      });
+      })
+        .then(res => {
+          setUser(res.data);
+          setLoading(false);
+        })
+        .catch(error => {
+          if (isAxiosError(error)) {
+            if (error.response?.status === 401) {
+              refreshAccessToken();
+            }
+          }
+        });
     } else {
       setLoading(false);
     }
   }, []);
 
+  // refresh token every 9 minutes (exp is 10 minutes)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (accessToken && refreshToken) {
+        refreshAccessToken();
+      }
+    }, 1000 * 60 * 9);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // redirect to login if user is null
   useEffect(() => {
     if (user === null && router.pathname !== '/login') {
       router.replace('/login');
@@ -93,6 +128,8 @@ function AuthContextProvider({ children }: PropsWithChildren) {
   return (
     <AuthContext.Provider value={{ user, login, logout }}>
       {children}
+
+      <button onClick={refreshAccessToken}>refresh</button>
     </AuthContext.Provider>
   );
 }
