@@ -20,3 +20,5 @@ export type Note = {
   id: string;
   content: string;
 };
+
+export type FilterBy = 'all' | 'archived' | 'unarchived';

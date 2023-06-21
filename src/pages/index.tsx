@@ -2,7 +2,7 @@ import Button from '@/components/Button/Button';
 import DefaultSpinner from '@/components/DefaultSpinner/DefaultSpinner';
 import FilterSelect from '@/components/FilterSelect/FilterSelect';
 import Navbar from '@/components/Navbar/Navbar';
-import { Call } from '@/types';
+import { Call, FilterBy } from '@/types';
 import { baseURL } from '@/utils/api';
 import {
   authorizationHeader,
@@ -30,6 +30,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [callDetailsModalOpen, setCallDetailsModalOpen] = useState(false);
   const [selectedCallId, setSelectedCallId] = useState<string>();
+  const [filter, setFilter] = useState<FilterBy>('all');
 
   const fetchCallsData = useCallback(async () => {
     setLoading(true);
@@ -106,6 +107,12 @@ export default function Home() {
   const startingEntryNumber = (currentPage - 1) * 10 + 1;
   const endingEntryNumber = currentPage * 10;
 
+  const filteredCalls = nodes?.filter(call => {
+    if (filter === 'all') return true;
+    else if (filter === 'archived') return call.is_archived;
+    else return !call.is_archived;
+  });
+
   return (
     <>
       <Navbar />
@@ -115,7 +122,12 @@ export default function Home() {
           Turing Technologies Frontend Test
         </h1>
 
-        <FilterSelect />
+        <FilterSelect
+          value={filter}
+          onValueChange={value => {
+            setFilter(value);
+          }}
+        />
 
         <table className="mt-7 w-full border border-[#CBD6E2] rounded-[4px] mb-12">
           <thead>
@@ -149,7 +161,7 @@ export default function Home() {
 
           {!loading && (
             <tbody>
-              {nodes?.map(c => (
+              {filteredCalls?.map(c => (
                 <tr
                   key={c.id}
                   className="border-b border-[#CBD6E2] hover:bg-[#f4f4f98f]"
