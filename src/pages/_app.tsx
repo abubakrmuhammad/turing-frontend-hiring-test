@@ -1,3 +1,4 @@
+import { AuthContextProvider } from '@/context/AuthContext';
 import '@/styles/globals.css';
 import type { AppProps } from 'next/app';
 import localFont from 'next/font/local';
@@ -26,7 +27,9 @@ const AvenirLTStd = localFont({
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <div className={`${AvenirLTStd.variable} font-sans`}>
-      <Component {...pageProps} />
+      <AuthContextProvider>
+        <Component {...pageProps} />
+      </AuthContextProvider>
     </div>
   );
 }

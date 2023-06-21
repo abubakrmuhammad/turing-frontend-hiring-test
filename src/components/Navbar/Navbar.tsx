@@ -1,8 +1,11 @@
 import Image from 'next/image';
 import ttLogo from '@/assets/images/tt-logo.png';
 import Button from '@/components/Button/Button';
+import { useAuth } from '@/context/AuthContext';
 
-function Navbar() {
+function Navbar({ logoOnly = false }) {
+  const { logout } = useAuth();
+
   return (
     <header className="flex justify-between items-center px-6 py-6 border-[#D3D5D8] border-b">
       <Image
@@ -11,7 +14,7 @@ function Navbar() {
         className="max-w-[313px]"
       />
 
-      <Button label="Log out" />
+      {!logoOnly && <Button label="Log out" onClick={logout} />}
     </header>
   );
 }
