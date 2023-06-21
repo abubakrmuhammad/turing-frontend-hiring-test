@@ -143,8 +143,6 @@ function AuthContextProvider({ children }: PropsWithChildren) {
   return (
     <AuthContext.Provider value={{ user, login, logout }}>
       {children}
-
-      <button onClick={refreshAccessToken}>refresh</button>
     </AuthContext.Provider>
   );
 }

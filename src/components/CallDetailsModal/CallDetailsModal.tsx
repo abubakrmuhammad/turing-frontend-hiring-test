@@ -8,6 +8,7 @@ import axios from 'axios';
 import { useFontElRef } from '@/context/FontElProvider';
 import Button from '../Button/Button';
 import DefaultSpinner from '../DefaultSpinner/DefaultSpinner';
+import CallType from '../CallType/CallType';
 
 type CallDetailsProps = {
   callID?: string;
@@ -63,7 +64,9 @@ const CallDetailsModal = ({ callID, open, onOpenChange }: CallDetailsProps) => {
               <div className="flex flex-col pt-8 pb-4 gap-3">
                 <div className="flex gap-3 text-sm">
                   <span className="font-bold min-w-[60px]">Call type</span>
-                  <span className="font-medium">{call?.call_type}</span>
+                  <span className="font-medium">
+                    <CallType type={call?.call_type} />
+                  </span>
                 </div>
                 <div className="flex gap-3 text-sm">
                   <span className="font-bold min-w-[60px]">Duration</span>

@@ -4,13 +4,19 @@ import FilterSelect from '@/components/FilterSelect/FilterSelect';
 import Navbar from '@/components/Navbar/Navbar';
 import { Call } from '@/types';
 import { baseURL } from '@/utils/api';
-import { authorizationHeader } from '@/utils/helpers';
+import {
+  authorizationHeader,
+  formatDate,
+  secondsToFormattedCallTime,
+} from '@/utils/helpers';
 import axios from 'axios';
 import clsx from 'clsx';
 import { useCallback, useEffect, useState } from 'react';
 
 import { ChevronLeftIcon, ChevronRightIcon } from '@radix-ui/react-icons';
 import CallDetailsModal from '@/components/CallDetailsModal/CallDetailsModal';
+import CallType from '@/components/CallType/CallType';
+import StatusPill from '@/components/StatusPill/StatusPill';
 
 type CallsData = {
   nodes: Call[];
@@ -39,6 +45,34 @@ export default function Home() {
 
     console.log('fetchCallsData >>>', res.data);
   }, [currentPage]);
+
+  const changeArchiveStatus = useCallback(
+    async (callId: string) => {
+      const res = await axios({
+        method: 'put',
+        url: `${baseURL}/calls/${callId}/archive`,
+        headers: authorizationHeader(),
+      });
+
+      if (!callsData) return;
+
+      const updatedCalls = callsData.nodes.map(call => {
+        if (call.id === callId) {
+          return res.data as Call;
+        }
+
+        return call;
+      });
+
+      setCallsData({
+        ...callsData,
+        nodes: updatedCalls,
+      });
+
+      console.log('changeArchiveStatus >>>', res.data);
+    },
+    [callsData]
+  );
 
   useEffect(() => {
     fetchCallsData();
@@ -118,26 +152,42 @@ export default function Home() {
               {nodes?.map(c => (
                 <tr
                   key={c.id}
-                  className="border-b border-[#CBD6E2] hover:bg-[#f4f4f98f] cursor-pointer"
-                  onClick={() => {
-                    setSelectedCallId(c.id);
-                    setCallDetailsModalOpen(true);
-                  }}
+                  className="border-b border-[#CBD6E2] hover:bg-[#f4f4f98f]"
                 >
-                  <TableCell className="text-[#325AE7] pl-7">
-                    {c.call_type}
+                  <TableCell className="pl-7">
+                    <CallType type={c.call_type} />
                   </TableCell>
-                  <TableCell>{c.direction}</TableCell>
-                  <TableCell>{c.duration}</TableCell>
+                  <TableCell className="capitalize text-[#325AE7]">
+                    {c.direction}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-col gap-1">
+                      <span>{secondsToFormattedCallTime(c.duration)}</span>
+
+                      <span className="text-[#325AE7]">
+                        ({c.duration} seconds)
+                      </span>
+                    </div>
+                  </TableCell>
                   <TableCell>{c.from}</TableCell>
                   <TableCell>{c.to}</TableCell>
                   <TableCell>{c.via}</TableCell>
-                  <TableCell>{c.created_at}</TableCell>
+                  <TableCell>{formatDate(new Date(c.created_at))}</TableCell>
                   <TableCell>
-                    {c.is_archived ? 'Archived' : 'Unarchived'}
+                    <StatusPill
+                      archived={c.is_archived}
+                      onClick={() => changeArchiveStatus(c.id)}
+                      className="cursor-pointer"
+                    />
                   </TableCell>
                   <TableCell>
-                    <Button label="Add Note" />
+                    <Button
+                      label="Add Note"
+                      onClick={() => {
+                        setSelectedCallId(c.id);
+                        setCallDetailsModalOpen(true);
+                      }}
+                    />
                   </TableCell>
                 </tr>
               ))}
@@ -160,7 +210,7 @@ export default function Home() {
           </div>
         )}
 
-        <div className="flex items-center justify-center mt-8 mx-auto w-full">
+        <div className="flex items-center justify-center mt-8 mx-auto w-full mb-8">
           <div className="flex flex-col items-center">
             <div className="flex items-center gap-2">
               <button
