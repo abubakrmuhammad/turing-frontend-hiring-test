@@ -1,43 +1,44 @@
 import React from 'react';
 import * as Select from '@radix-ui/react-select';
 import clsx from 'clsx';
-import {
-  CheckIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
-} from '@radix-ui/react-icons';
+import { ChevronDownIcon } from '@radix-ui/react-icons';
+import { useFontElRef } from '@/context/FontElProvider';
 
-const FilterSelect = ({ label = 'Filter by:' }) => (
-  <div className="flex items-center gap-2">
-    <label className="text-[14px] leading-[17px]">{label}</label>
-    <Select.Root>
-      <Select.Trigger className="inline-flex items-center justify-center rounded px-2 text-[14px] font-medium leading-none h-[35px] gap-[5px] text-primary outline-none">
-        <Select.Value placeholder="Status" />
-        <Select.Icon className="text-[#575962]">
-          <ChevronDownIcon />
-        </Select.Icon>
-      </Select.Trigger>
+const FilterSelect = ({ label = 'Filter by:' }) => {
+  const fontElRef = useFontElRef();
 
-      <Select.Portal>
-        <Select.Content
-          position="popper"
-          className="overflow-hidden bg-white rounded-[3px] shadow-[0px_1px_12px_0px_rgba(0,_0,_0,_0.08)] min-w-[200px]"
-          data-state="open"
-        >
-          <Select.Viewport className="px-2 py-4">
-            <Select.Group>
-              <SelectItem value="apple">Apple</SelectItem>
-              <SelectItem value="banana">Banana</SelectItem>
-              <SelectItem value="blueberry">Blueberry</SelectItem>
-              <SelectItem value="grapes">Grapes</SelectItem>
-              <SelectItem value="pineapple">Pineapple</SelectItem>
-            </Select.Group>
-          </Select.Viewport>
-        </Select.Content>
-      </Select.Portal>
-    </Select.Root>
-  </div>
-);
+  return (
+    <div className="flex items-center gap-2">
+      <label className="text-[14px] leading-[17px]">{label}</label>
+      <Select.Root>
+        <Select.Trigger className="inline-flex items-center justify-center rounded px-2 text-[14px] font-medium leading-none h-[35px] gap-[5px] text-primary outline-none">
+          <Select.Value placeholder="Status" />
+          <Select.Icon className="text-[#575962]">
+            <ChevronDownIcon />
+          </Select.Icon>
+        </Select.Trigger>
+
+        <Select.Portal container={fontElRef.current}>
+          <Select.Content
+            position="popper"
+            className="overflow-hidden bg-white rounded-[3px] shadow-[0px_1px_12px_0px_rgba(0,_0,_0,_0.08)] min-w-[200px]"
+            data-state="open"
+          >
+            <Select.Viewport className="px-2 py-4">
+              <Select.Group>
+                <SelectItem value="apple">Apple</SelectItem>
+                <SelectItem value="banana">Banana</SelectItem>
+                <SelectItem value="blueberry">Blueberry</SelectItem>
+                <SelectItem value="grapes">Grapes</SelectItem>
+                <SelectItem value="pineapple">Pineapple</SelectItem>
+              </Select.Group>
+            </Select.Viewport>
+          </Select.Content>
+        </Select.Portal>
+      </Select.Root>
+    </div>
+  );
+};
 
 type SelectItemProps = {
   children: React.ReactNode;

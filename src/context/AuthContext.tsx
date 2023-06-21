@@ -4,10 +4,10 @@ import { baseURL } from '@/utils/api';
 import { authorizationHeader } from '@/utils/helpers';
 import axios, { isAxiosError } from 'axios';
 import { useRouter } from 'next/router';
-import { type } from 'os';
 import {
   PropsWithChildren,
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useState,
@@ -49,6 +49,7 @@ function AuthContextProvider({ children }: PropsWithChildren) {
     setUser(user);
     localStorage.setItem('access_token', access_token);
     localStorage.setItem('refresh_token', refresh_token);
+    localStorage.setItem('token_time', new Date().toString());
   };
 
   const logout = () => {
@@ -57,18 +58,26 @@ function AuthContextProvider({ children }: PropsWithChildren) {
     localStorage.removeItem('refresh_token');
   };
 
-  const refreshAccessToken = async () => {
-    const res = await axios({
-      method: 'post',
-      url: `${baseURL}/auth/refresh-token`,
-      headers: authorizationHeader(),
-    });
+  const refreshAccessToken = useCallback(async () => {
+    try {
+      const res = await axios({
+        method: 'post',
+        url: `${baseURL}/auth/refresh-token`,
+        headers: authorizationHeader(),
+      });
 
-    const { access_token, user } = res.data;
+      const { access_token, user } = res.data;
 
-    localStorage.setItem('access_token', access_token);
-    setUser(user);
-  };
+      localStorage.setItem('access_token', access_token);
+      setUser(user);
+    } catch (error) {
+      if (isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          logout();
+        }
+      }
+    }
+  }, []);
 
   // get user data on first render
   // and refresh token if expired on load
@@ -93,18 +102,24 @@ function AuthContextProvider({ children }: PropsWithChildren) {
     } else {
       setLoading(false);
     }
-  }, []);
+  }, [refreshAccessToken]);
 
   // refresh token every 9 minutes (exp is 10 minutes)
   useEffect(() => {
+    const tokenTime = localStorage.getItem('token_time');
+    const tokenTimeDate = new Date(tokenTime || '');
+    const now = new Date();
+
+    if (now.getTime() - tokenTimeDate.getTime() > 9 * 60 * 1000) {
+      refreshAccessToken();
+    }
+
     const interval = setInterval(() => {
-      if (accessToken && refreshToken) {
-        refreshAccessToken();
-      }
-    }, 1000 * 60 * 9);
+      refreshAccessToken();
+    }, 9 * 60 * 1000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [refreshAccessToken]);
 
   // redirect to login if user is null
   useEffect(() => {

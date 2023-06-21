@@ -4,7 +4,7 @@ type ButtonProps = {
   label: string;
 } & React.ButtonHTMLAttributes<HTMLButtonElement>;
 
-function Button({ label, ...props }: ButtonProps) {
+function Button({ label, className, ...props }: ButtonProps) {
   return (
     <button
       className={clsx(
@@ -12,7 +12,8 @@ function Button({ label, ...props }: ButtonProps) {
         {
           'hover:bg-primary-dark': !props.disabled,
           'opacity-50 cursor-not-allowed': props.disabled,
-        }
+        },
+        className
       )}
       {...props}
     >
