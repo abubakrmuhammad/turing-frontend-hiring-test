@@ -17,6 +17,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from '@radix-ui/react-icons';
 import CallDetailsModal from '@/components/CallDetailsModal/CallDetailsModal';
 import CallType from '@/components/CallType/CallType';
 import StatusPill from '@/components/StatusPill/StatusPill';
+import Head from 'next/head';
 
 type CallsData = {
   nodes: Call[];
@@ -115,6 +116,10 @@ export default function Home() {
 
   return (
     <>
+      <Head>
+        <title>Turing Technologies Frontend Test</title>
+      </Head>
+
       <Navbar />
 
       <main className="px-11 py-8">
