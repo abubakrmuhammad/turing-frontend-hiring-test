@@ -1,0 +1,6 @@
+.yarn
+.vite
+node_modules
+dist
+dist-ssr
+.next
